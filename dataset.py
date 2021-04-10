@@ -273,6 +273,8 @@ class Yolo_dataset(Dataset):
         bboxes = np.array(self.truth.get(img_path), dtype=np.float)
         print(os.getcwd())
         print(img_path)
+        print(str(os.path.join(os.getcwd(), '/', img_path)))
+        print(str(os.path.join(os.getcwd(), img_path)))
         img_path = os.path.join(os.getcwd(), '/', img_path)
         use_mixup = self.cfg.mixup
         if random.randint(0, 1):
