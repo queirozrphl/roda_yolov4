@@ -296,7 +296,10 @@ class Yolo_dataset(Dataset):
                 img_path = os.path.join(self.cfg.dataset_dir, img_path)
             # print(str(img_path))
             img = cv2.imread(img_path)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            try:
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            except:
+                print("erro na imagem " + img_path)
             if img is None:
                 continue
             oh, ow, oc = img.shape
