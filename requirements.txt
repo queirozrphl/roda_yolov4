@@ -7,5 +7,5 @@ tqdm==4.43.0
 easydict==1.9
 Pillow==7.1.2
 # skimage
-opencv_python
+opencv-python==4.5.1.48
 pycocotools
