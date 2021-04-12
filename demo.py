@@ -18,6 +18,9 @@ from tool.utils import *
 from tool.torch_utils import *
 from tool.darknet2pytorch import Darknet
 import argparse
+import torch
+# from sort import *
+# from PIL import Image
 
 """hyper parameters"""
 use_cuda = True
@@ -28,6 +31,10 @@ def detect_cv2(cfgfile, weightfile, imgfile):
 
     m.print_network()
     m.load_weights(weightfile)
+    if args.torch:
+        m.load_state_dict(torch.load(weightfile))
+    else:
+        m.load_weights(weightfile)
     print('Loading weights from %s... Done!' % (weightfile))
 
     if use_cuda:
@@ -52,22 +59,27 @@ def detect_cv2(cfgfile, weightfile, imgfile):
         finish = time.time()
         if i == 1:
             print('%s: Predicted in %f seconds.' % (imgfile, (finish - start)))
-
     plot_boxes_cv2(img, boxes[0], savename='predictions.jpg', class_names=class_names)
 
 
 def detect_cv2_camera(cfgfile, weightfile):
     import cv2
     m = Darknet(cfgfile)
+    # mot_tracker = Sort()
 
     m.print_network()
     m.load_weights(weightfile)
+    if args.torch:
+        m.load_state_dict(torch.load(weightfile))
+    else:
+        m.load_weights(weightfile)
     print('Loading weights from %s... Done!' % (weightfile))
 
     if use_cuda:
         m.cuda()
 
-    cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture('rtsp://192.168.1.75:8554/mjpeg/1')
     # cap = cv2.VideoCapture("./test.mp4")
     cap.set(3, 1280)
     cap.set(4, 720)
@@ -86,18 +98,22 @@ def detect_cv2_camera(cfgfile, weightfile):
         ret, img = cap.read()
         sized = cv2.resize(img, (m.width, m.height))
         sized = cv2.cvtColor(sized, cv2.COLOR_BGR2RGB)
+        # piling = Image.fromarray(sized)
 
-        start = time.time()
+        start = time.time() 
         boxes = do_detect(m, sized, 0.4, 0.6, use_cuda)
-        finish = time.time()
-        print('Predicted in %f seconds.' % (finish - start))
-
-        result_img = plot_boxes_cv2(img, boxes[0], savename=None, class_names=class_names)
+        if boxes is not None:
+            # tracked_object = mot_tracker.update(tensorQ)
+            finish = time.time()
+            print('Predicted in %f seconds.' % (finish - start))
+            result_img = plot_boxes_cv2(img, boxes[0], savename=None, class_names=class_names)
 
         cv2.imshow('Yolo demo', result_img)
-        cv2.waitKey(1)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
     cap.release()
+    cv2.destroyAllWindows()
 
 
 def detect_skimage(cfgfile, weightfile, imgfile):
@@ -133,7 +149,7 @@ def detect_skimage(cfgfile, weightfile, imgfile):
 
     plot_boxes_cv2(img, boxes, savename='predictions.jpg', class_names=class_names)
 
-
+#python demo.py -weightfile checkpoints/Yolov4_epoch300.pth -imgfile data/roda_pytorch_yolov4/test/opencv_frame_160_png.rf.d2a36eb6fb827c574db82d42c4cbcb9e.jpg
 def get_args():
     parser = argparse.ArgumentParser('Test your image or video by trained model.')
     parser.add_argument('-cfgfile', type=str, default='./cfg/yolov4.cfg',
@@ -144,17 +160,23 @@ def get_args():
     parser.add_argument('-imgfile', type=str,
                         default='./data/dog.jpg',
                         help='path of your image file.', dest='imgfile')
+    parser.add_argument('-torch', type=bool, default=False,
+                        help='use torch weights')
     args = parser.parse_args()
+    
 
     return args
 
 
 if __name__ == '__main__':
     args = get_args()
-    if args.imgfile:
-        detect_cv2(args.cfgfile, args.weightfile, args.imgfile)
-        # detect_imges(args.cfgfile, args.weightfile)
-        # detect_cv2(args.cfgfile, args.weightfile, args.imgfile)
-        # detect_skimage(args.cfgfile, args.weightfile, args.imgfile)
-    else:
-        detect_cv2_camera(args.cfgfile, args.weightfile)
+    print("camera reading")
+    detect_cv2_camera(args.cfgfile, args.weightfile)
+    # if args.imgfile:
+    #     detect_cv2(args.cfgfile, args.weightfile, args.imgfile)
+    #     # detect_imges(args.cfgfile, args.weightfile)
+    #     # detect_cv2(args.cfgfile, args.weightfile, args.imgfile)
+    #     # detect_skimage(args.cfgfile, args.weightfile, args.imgfile)
+    # else:
+    #     print("capturando pela camera")
+    #     detect_cv2_camera(args.cfgfile, args.weightfile)
