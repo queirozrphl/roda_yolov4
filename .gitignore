@@ -17,4 +17,6 @@ log
 
 # *.jpg
 # *.json
+checkpoints/
+*.pth
 data/outcome
