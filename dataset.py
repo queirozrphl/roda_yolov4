@@ -295,7 +295,10 @@ class Yolo_dataset(Dataset):
                 img_path = os.path.join(self.cfg.dataset_dir, img_path)
             print(img_path)
             img = cv2.imread(img_path)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            try:
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            except:
+                print("erro na imagem " + img_path)
             if img is None:
                 continue
             oh, ow, oc = img.shape
@@ -424,11 +427,10 @@ def get_image_id(filename:str) -> int:
     >>> no = f"{int(no):04d}"
     >>> return int(lv+no)
     """
-    raise NotImplementedError("Create your own 'get_image_id' function")
-    lv, no = os.path.splitext(os.path.basename(filename))[0].split("_")
-    lv = lv.replace("level", "")
-    no = f"{int(no):04d}"
-    return int(lv+no)
+    # raise NotImplementedError("Create your own 'get_image_id' function")
+    #opencv_frame_173_png.rf.17c987a4f7b29f982d129b2cf66ea75d -> will return 173
+    image_id = os.path.splitext(os.path.basename(filename))[0].split("_")[2]
+    return int(image_id)
 
 
 if __name__ == "__main__":
