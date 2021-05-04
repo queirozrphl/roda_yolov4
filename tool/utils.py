@@ -151,7 +151,6 @@ def read_truths(lab_path):
     else:
         return np.array([])
 
-
 def load_class_names(namesfile):
     class_names = []
     with open(namesfile, 'r') as fp:
@@ -231,3 +230,18 @@ def post_processing(img, conf_thresh, nms_thresh, output):
     print('-----------------------------------')
     
     return bboxes_batch
+
+def count_total_in_image(boxes, class_names):
+    items = {}
+    for i in range(len(boxes)):
+        box = boxes[i]
+        cls_conf = box[5]
+        cls_id = box[6]
+        if cls_conf > 0.8:
+            if class_names[cls_id] in items:
+                items[class_names[cls_id]] += 1
+            else:
+                items[class_names[cls_id]] = 1
+    print(items)
+    return items
+

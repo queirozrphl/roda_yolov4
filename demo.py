@@ -19,6 +19,7 @@ from tool.torch_utils import *
 from tool.darknet2pytorch import Darknet
 import argparse
 import torch
+import time
 # from sort import *
 # from PIL import Image
 
@@ -49,18 +50,25 @@ def detect_cv2(cfgfile, weightfile, imgfile):
         namesfile = 'data/x.names'
     class_names = load_class_names(namesfile)
 
-    img = cv2.imread(imgfile)
-    sized = cv2.resize(img, (m.width, m.height))
-    sized = cv2.cvtColor(sized, cv2.COLOR_BGR2RGB)
-
-    for i in range(2):
-        start = time.time()
-        boxes = do_detect(m, sized, 0.4, 0.6, use_cuda)
-        finish = time.time()
-        if i == 1:
-            print('%s: Predicted in %f seconds.' % (imgfile, (finish - start)))
-    plot_boxes_cv2(img, boxes[0], savename='predictions.jpg', class_names=class_names)
-
+    while True:
+        val = input("\n numero da imagem: ")
+        pred_init_time = time.time()
+        named_file = "../fotos_geladeira_4/opencv_frame_" + val + ".png"
+        print(named_file)
+        img = cv2.imread(named_file)
+        # img = cv2.imread(imgfile)
+        sized = cv2.resize(img, (m.width, m.height))
+        sized = cv2.cvtColor(sized, cv2.COLOR_BGR2RGB)
+        for i in range(2):
+            start = time.time()
+            boxes = do_detect(m, sized, 0.4, 0.6, use_cuda)
+            finish = time.time()
+            if i == 1:
+                print('%s: Predicted in %f seconds.' % (imgfile, (finish - start)))
+        
+        plot_boxes_cv2(img, boxes[0], savename='predictions.jpg', class_names=class_names)
+        count_total_in_image(boxes[0], class_names)
+        print("\n Total inference time {0} seconds".format(time.time() - pred_init_time))
 
 def detect_cv2_camera(cfgfile, weightfile):
     import cv2
@@ -158,7 +166,7 @@ def get_args():
                         default='./checkpoints/yolov4.pth',
                         help='path of trained model.', dest='weightfile')
     parser.add_argument('-imgfile', type=str,
-                        default='./data/dog.jpg',
+                        default=None,
                         help='path of your image file.', dest='imgfile')
     parser.add_argument('-torch', type=bool, default=False,
                         help='use torch weights')
@@ -170,13 +178,13 @@ def get_args():
 
 if __name__ == '__main__':
     args = get_args()
-    print("camera reading")
-    detect_cv2_camera(args.cfgfile, args.weightfile)
-    # if args.imgfile:
-    #     detect_cv2(args.cfgfile, args.weightfile, args.imgfile)
-    #     # detect_imges(args.cfgfile, args.weightfile)
-    #     # detect_cv2(args.cfgfile, args.weightfile, args.imgfile)
-    #     # detect_skimage(args.cfgfile, args.weightfile, args.imgfile)
-    # else:
-    #     print("capturando pela camera")
-    #     detect_cv2_camera(args.cfgfile, args.weightfile)
+    # print("camera reading")
+    # detect_cv2_camera(args.cfgfile, args.weightfile)
+    if args.imgfile:
+        detect_cv2(args.cfgfile, args.weightfile, args.imgfile)
+        # detect_imges(args.cfgfile, args.weightfile)
+        # detect_cv2(args.cfgfile, args.weightfile, args.imgfile)
+        # detect_skimage(args.cfgfile, args.weightfile, args.imgfile)
+    else:
+        print("capturando pela camera")
+        detect_cv2_camera(args.cfgfile, args.weightfile)

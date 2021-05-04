@@ -36,7 +36,7 @@ Cfg.hue = .1
 Cfg.learning_rate = 0.00261
 Cfg.burn_in = 1000
 Cfg.max_batches = 500500
-Cfg.steps = [9600,10800]
+Cfg.steps = [14400,16200]
 Cfg.policy = Cfg.steps
 Cfg.scales = .1, .1
 
@@ -45,7 +45,7 @@ Cfg.mosaic = 1
 
 Cfg.letter_box = 0
 Cfg.jitter = 0.2
-Cfg.classes = 6
+Cfg.classes = 9
 Cfg.track = 0
 Cfg.w = Cfg.width
 Cfg.h = Cfg.height
