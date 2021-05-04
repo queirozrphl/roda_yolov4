@@ -21,6 +21,7 @@ def parse_cfg(cfgfile):
             if block['type'] == 'convolutional':
                 block['batch_normalize'] = 0
         else:
+            print(line)
             key, value = line.split('=')
             key = key.strip()
             if key == 'type':
